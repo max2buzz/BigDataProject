@@ -23,8 +23,23 @@ router.get('/query/sample', function(req, res){
   cypher(query,params,cb);
 });
 
+router.get('/query/actorPair', function(req, res){
+  var query="";
+  var params={limit: 10};
+  var cb=function(err,data) {
+    res.json(data);
+  }
+  cypher(query,params,cb);
+});
 
-
+router.get('/query/actorGenre', function(req, res){
+  var query="";
+  var params={limit: 10};
+  var cb=function(err,data) {
+    res.json(data);
+  }
+  cypher(query,params,cb);
+});
 
 
 
