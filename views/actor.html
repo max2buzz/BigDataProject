@@ -1,0 +1,68 @@
+<html>
+
+  <head>
+
+  </head>
+  <body>
+    <h1>Actor Page</h1>
+
+
+    <div class="actorPair">
+      <label for="Actor">Actor 1</label>
+      <input type="text" name="actor1" id="actorPairIn">
+      <button id="pairSubmit">Submit</button>
+      <br>
+      <div class="res">
+        <canvas id="clients" width="800" height="600"></canvas>
+      </div>
+    </div>
+
+    <script src="js/Chart.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script>
+        $('#pairSubmit').on('click', function(){
+          //  console.log($('#actorPairIn').val());
+           if ($("#actorPairIn").val()==="") {
+               console.log("abc is required");
+           }
+           else{
+             var formData={
+               nameActor: $("#actorPairIn").val(),
+               limit:10
+             };
+             $.post('/query/actorPair', formData, function(data){
+               var resData = (data.results[0].data);
+               var myLabel=[];
+               var myData = [];
+               for(var i=0; i<resData.length; i++){
+                 console.log(resData[i].row[1]+" -> "+resData[i].row[2]);
+                 myLabel.push(resData[i].row[1]);
+                 myData.push(parseInt(resData[i].row[2]));
+               }
+               console.log(myLabel);
+               console.log(myData);
+               var barData = {
+                 labels: myLabel,
+                 datasets: [
+                     {
+                         label: 'Actor',
+                         fillColor: '#382765',
+                         data: myData
+                     }
+                 ]
+               };
+               $('#clients').remove();
+               $('.res').append('<canvas id="clients" width="600" height="400"></canvas>')
+               var context = document.getElementById('clients').getContext('2d');
+               var clientsChart = new Chart(context).Bar(barData);
+             });
+           }
+        });
+
+    </script>
+
+  </body>
+
+</html>
