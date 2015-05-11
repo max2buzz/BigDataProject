@@ -14,9 +14,9 @@ function cypher(query, params, cb) {
       }
     },
     function(err, res) {
-      cb(err, res.body)
+      cb(err, res.body);
     });
-};
+}
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -26,6 +26,10 @@ router.get('/', function(req, res, next) {
 //Get the Actor Page
 router.get('/actor', function(req, res, next) {
   res.render('actor');
+});
+
+router.get('/director', function(req, res, next) {
+  res.render('director');
 });
 
 
@@ -38,7 +42,7 @@ router.get('/query/sample', function(req, res) {
   var cb = function(err, data) {
     console.log(JSON.stringify(data));
     res.json(data);
-  }
+  };
   cypher(query, params, cb);
 });
 
@@ -63,8 +67,11 @@ router.post('/query/actorPair', function(req, res) {
 //Actor for a specific genre
 router.post('/query/actorGenre', function(req, res) {
 
-  var movieGenre = (req.body.movieGenre);
-  var limitRes  = (req.body.limitRes);
+  var movieGenre = (req.body.movieGenre).trim();
+  var limitRes  = (req.body.limitRes).trim();
+
+  console.log(movieGenre);
+  console.log(limitRes);
 
   var query = "match (a:Actor)-[:ACTS_IN]->(m:Movie) where m.genre={genre} return a.name as Actor1, count(m.title)as NumberOfMovies Order BY NumberOfMovies DESC LIMIT {limit}";
   var params = {
@@ -80,11 +87,14 @@ router.post('/query/actorGenre', function(req, res) {
 //Actor And Genre
 router.post('/query/actorGenrePair', function(req, res) {
 
-  var nameActor = (req.body.nameActor);
-  var movieGenre = (req.body.movieGenre);
-  var limitRes  = (req.body.limitRes);
+  var nameActor = (req.body.nameActor).trim();
+  var movieGenre = (req.body.movieGenre).trim();
+  var limitRes  = (req.body.limitRes).trim();
 
-  var query = "match (a:Actor)-[:ACTS_IN]->(m:Movie)<- [r:RATED]- () where m.genre={genre} and a.name={name} return a.name as Actor1, count(m.title)as NumberOfMovies, avg(r.stars)as Rating Order BY NumberOfMovies DESC , Rating DESC LIMIT {limit}";
+  console.log(nameActor);
+  console.log(movieGenre);
+
+  var query = "MATCH (a:Actor)-[:ACTS_IN]->(m:Movie) where m.genre={genre} and a.name={name} return a.name as Actor, count(m.title) as NumberOfMoviesOrder";
   var params = {
     name: nameActor,
     genre: movieGenre,
@@ -97,13 +107,13 @@ router.post('/query/actorGenrePair', function(req, res) {
 });
 
 //Director Two Actors to pair with
-router.post('/query/actorPair', function(req, res) {
+router.post('/query/actorPairWith', function(req, res) {
 
-  var nameActor = (req.body.nameActor);
-  var nameActor2 = (req.body.nameActor2);
-  var limitRes  = (req.body.limitRes);
+  var nameActor = (req.body.nameActor1).trim();
+  var nameActor2 = (req.body.nameActor2).trim();
+  var limitRes  = (req.body.limitRes).trim();
 
-  var query = "match (a:Actor)-[:ACTS_IN]->(m:Movie)<-[:ACTS_IN]-(s:Actor) where a.name={name} and s.name={name2} return a.name as Actor1,s.name as Actor2, count(m.title) as NoMovies ORDER BY NumberOfMovies DESC LIMIT {limit}";
+  var query = "match (a:Actor)-[:ACTS_IN]->(m:Movie)<-[:ACTS_IN]-(s:Actor) where a.name={name} and s.name={name2} return a.name as Actor1,s.name as Actor2, count(m.title) as NoMovies ORDER BY NoMovies DESC LIMIT {limit}";
   var params = {
     name: nameActor,
     name2: nameActor2,
@@ -118,13 +128,13 @@ router.post('/query/actorPair', function(req, res) {
 //Director: Genre success for actor
 router.post('/query/actorGenreSuccess', function(req, res) {
 
-  var nameActor = (req.body.nameActor);
-  var limitRes  = (req.body.limitRes);
+  var nameActor = (req.body.nameActor).trim();
+  var limitRes  = (req.body.limitRes).trim();
 
-  var query = "match (a:Actor)-[:ACTS_IN]->(m:Movie) where a.name= {name} return m.genre as MovieGenre, count(m.title)as NumberOfMovies ORDER BY NumberOfMovies DESC LIMIT {limit}";
+  var query = "MATCH (m:Movie)<-[:ACTS_IN]-(s:Actor) where s.name={name} return (m.genre) as GenreM, count(*) as COUNT_A order by COUNT_A DESC LIMIT {limit}";
   var params = {
     name: nameActor,
-    limit: 10
+    limit: 20
   };
   var cb = function(err, data) {
     res.json(data);
@@ -135,8 +145,8 @@ router.post('/query/actorGenreSuccess', function(req, res) {
 //Director pair
 router.post('/query/actorDirectorPair', function(req, res) {
 
-  var nameActor = (req.body.nameActor);
-  var limitRes  = (req.body.limitRes);
+  var nameActor = (req.body.nameActor).trim();
+  var limitRes  = (req.body.limitRes).trim();
 
   var query = "match (d:Director)-[:DIRECTED]->(m:Movie)<-[ACTS_IN]-(a:Actor)where a.name={name} return d.name as Director, count(m.title) as NumberOfMovies ORDER BY NumberOfMovies DESC LIMIT {limit}";
   var params = {
